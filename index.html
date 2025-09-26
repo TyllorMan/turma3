@@ -1,1 +1,652 @@
-ola mundo
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Tarefas</title>
+    <style>
+        :root {
+            color-scheme: light dark;
+            --bg: #f7f7f9;
+            --card: #ffffff;
+            --text: #1f2933;
+            --muted: #52606d;
+            --accent: #3b82f6;
+            --accent-dark: #1d4ed8;
+            --border: #e2e8f0;
+            --shadow: rgba(15, 23, 42, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(145deg, #e8f0ff 0%, #f7f7f9 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2.5rem 1rem;
+            color: var(--text);
+        }
+
+        main {
+            background: var(--card);
+            width: min(960px, 100%);
+            border-radius: 24px;
+            padding: 2.5rem 3rem;
+            box-shadow: 0 24px 60px -20px var(--shadow);
+            display: grid;
+            gap: 2rem;
+        }
+
+        header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        header h1 {
+            font-size: clamp(2rem, 4vw, 2.75rem);
+            letter-spacing: -0.02em;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.85rem;
+            border-radius: 999px;
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        form {
+            display: grid;
+            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            align-items: end;
+        }
+
+        label {
+            display: grid;
+            gap: 0.5rem;
+            font-weight: 600;
+            color: var(--muted);
+            font-size: 0.95rem;
+        }
+
+        input[type="text"], textarea, input[type="date"], select {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-size: 1rem;
+            background-color: #fff;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            resize: none;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        input[type="date"]:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
+        }
+
+        textarea {
+            min-height: 120px;
+        }
+
+        button {
+            border: none;
+            cursor: pointer;
+            border-radius: 12px;
+            padding: 0.85rem 1.2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .primary {
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent-dark) 100%);
+            color: white;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px -10px rgba(37, 99, 235, 0.5);
+        }
+
+        .secondary {
+            background: rgba(15, 23, 42, 0.04);
+            color: var(--muted);
+        }
+
+        .tasks-card {
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 1.5rem;
+            background: #fff;
+            box-shadow: 0 16px 40px -24px rgba(15, 23, 42, 0.35);
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .task-stats {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.95rem;
+            color: var(--muted);
+        }
+
+        .filters {
+            display: inline-flex;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 0.3rem;
+            background: rgba(148, 163, 184, 0.12);
+            gap: 0.3rem;
+        }
+
+        .filters button {
+            background: transparent;
+            padding: 0.45rem 0.95rem;
+            border-radius: 999px;
+            font-size: 0.9rem;
+            color: var(--muted);
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .filters button.active {
+            background: #fff;
+            color: var(--accent);
+            box-shadow: 0 8px 20px -12px rgba(59, 130, 246, 0.45);
+        }
+
+        ul {
+            list-style: none;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .task {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            gap: 1rem;
+            align-items: stretch;
+            padding: 1rem 1.25rem;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            transition: border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .task:hover {
+            transform: translateY(-2px);
+            border-color: rgba(59, 130, 246, 0.45);
+            box-shadow: 0 12px 30px -18px rgba(59, 130, 246, 0.5);
+        }
+
+        .task.completed {
+            background: rgba(59, 130, 246, 0.05);
+            border-color: rgba(59, 130, 246, 0.35);
+        }
+
+        .task.completed .task-title {
+            text-decoration: line-through;
+            color: rgba(15, 23, 42, 0.45);
+        }
+
+        .task-checkbox {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .task-content {
+            display: grid;
+            gap: 0.5rem;
+        }
+
+        .task-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: -0.01em;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+            color: var(--muted);
+        }
+
+        .priority {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-weight: 600;
+        }
+
+        .priority[data-priority="alta"] {
+            color: #ef4444;
+        }
+
+        .priority[data-priority="media"] {
+            color: #f59e0b;
+        }
+
+        .priority[data-priority="baixa"] {
+            color: #10b981;
+        }
+
+        .task-actions {
+            display: inline-flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .task-actions button {
+            padding: 0.55rem 0.8rem;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            background: rgba(148, 163, 184, 0.12);
+            color: var(--muted);
+            transition: background-color 0.2s ease;
+        }
+
+        .task-actions button:hover {
+            background: rgba(148, 163, 184, 0.2);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2.5rem 1rem;
+            color: var(--muted);
+            background: rgba(148, 163, 184, 0.1);
+            border-radius: 16px;
+            border: 2px dashed rgba(148, 163, 184, 0.35);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 768px) {
+            main {
+                padding: 2rem 1.5rem;
+            }
+
+            .task {
+                grid-template-columns: 1fr;
+            }
+
+            .task-checkbox {
+                justify-content: flex-start;
+            }
+
+            .task-actions {
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <header>
+            <div>
+                <h1>Lista de Tarefas</h1>
+                <p class="badge" id="taskCount">0 tarefas</p>
+            </div>
+            <button class="secondary" id="clearCompleted" type="button">Limpar concluídas</button>
+        </header>
+
+        <form id="taskForm" autocomplete="off">
+            <label>
+                Título
+                <input type="text" id="title" name="title" placeholder="Qual é a tarefa?" required>
+            </label>
+            <label>
+                Descrição
+                <textarea id="description" name="description" placeholder="Detalhes importantes"></textarea>
+            </label>
+            <label>
+                Prazo
+                <input type="date" id="dueDate" name="dueDate">
+            </label>
+            <label>
+                Prioridade
+                <select id="priority" name="priority">
+                    <option value="baixa">Baixa</option>
+                    <option value="media" selected>Média</option>
+                    <option value="alta">Alta</option>
+                </select>
+            </label>
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+                <button class="primary" type="submit" id="submitButton">Adicionar tarefa</button>
+                <button class="secondary hidden" type="button" id="cancelEdit">Cancelar edição</button>
+            </div>
+        </form>
+
+        <section class="tasks-card" aria-live="polite">
+            <div class="task-stats">
+                <span id="statusSummary">Nenhuma tarefa cadastrada</span>
+                <div class="filters" role="group" aria-label="Filtro de tarefas">
+                    <button type="button" data-filter="todas" class="active">Todas</button>
+                    <button type="button" data-filter="ativas">Ativas</button>
+                    <button type="button" data-filter="concluidas">Concluídas</button>
+                </div>
+            </div>
+            <ul id="taskList" aria-label="Lista de tarefas"></ul>
+            <p class="empty-state hidden" id="emptyState">Sua lista está vazia. Adicione uma nova tarefa para começar.</p>
+        </section>
+    </main>
+
+    <script>
+        const taskForm = document.getElementById('taskForm');
+        const titleInput = document.getElementById('title');
+        const descriptionInput = document.getElementById('description');
+        const dueDateInput = document.getElementById('dueDate');
+        const prioritySelect = document.getElementById('priority');
+        const taskList = document.getElementById('taskList');
+        const taskCount = document.getElementById('taskCount');
+        const statusSummary = document.getElementById('statusSummary');
+        const emptyState = document.getElementById('emptyState');
+        const filterButtons = document.querySelectorAll('.filters button');
+        const clearCompletedButton = document.getElementById('clearCompleted');
+        const submitButton = document.getElementById('submitButton');
+        const cancelEditButton = document.getElementById('cancelEdit');
+
+        let tasks = [];
+        let currentFilter = 'todas';
+        let editingTaskId = null;
+
+        const storageKey = 'todo-list-tasks';
+
+        function loadTasks() {
+            try {
+                const stored = JSON.parse(localStorage.getItem(storageKey));
+                if (Array.isArray(stored)) {
+                    tasks = stored.map(task => ({
+                        ...task,
+                        createdAt: task.createdAt || new Date().toISOString()
+                    }));
+                }
+            } catch (error) {
+                console.error('Erro ao carregar tarefas:', error);
+                tasks = [];
+            }
+        }
+
+        function saveTasks() {
+            localStorage.setItem(storageKey, JSON.stringify(tasks));
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return 'Sem prazo definido';
+            const date = new Date(dateString + 'T00:00:00');
+            return new Intl.DateTimeFormat('pt-BR', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            }).format(date);
+        }
+
+        function updateSummary() {
+            const total = tasks.length;
+            const completed = tasks.filter(task => task.completed).length;
+            const pending = total - completed;
+
+            taskCount.textContent = total === 1 ? '1 tarefa' : `${total} tarefas`;
+
+            if (!total) {
+                statusSummary.textContent = 'Nenhuma tarefa cadastrada';
+            } else if (!completed) {
+                statusSummary.textContent = total === 1
+                    ? 'Você tem 1 tarefa pendente'
+                    : `Você tem ${pending} tarefas pendentes`;
+            } else if (pending === 0) {
+                statusSummary.textContent = 'Todas as tarefas foram concluídas. Excelente trabalho!';
+            } else {
+                statusSummary.textContent = `${completed} concluída${completed > 1 ? 's' : ''} · ${pending} pendente${pending > 1 ? 's' : ''}`;
+            }
+        }
+
+        function toggleEmptyState(shouldShow) {
+            if (shouldShow) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+            }
+        }
+
+        function createTaskElement(task) {
+            const li = document.createElement('li');
+            li.className = `task${task.completed ? ' completed' : ''}`;
+            li.dataset.id = task.id;
+
+            const checkboxWrapper = document.createElement('div');
+            checkboxWrapper.className = 'task-checkbox';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = task.completed;
+            checkbox.setAttribute('aria-label', `Marcar tarefa "${task.title}" como ${task.completed ? 'pendente' : 'concluída'}`);
+            checkbox.addEventListener('change', () => toggleTaskCompletion(task.id));
+            checkboxWrapper.appendChild(checkbox);
+
+            const content = document.createElement('div');
+            content.className = 'task-content';
+
+            const title = document.createElement('p');
+            title.className = 'task-title';
+            title.textContent = task.title;
+
+            const description = document.createElement('p');
+            description.textContent = task.description;
+            description.className = 'task-description';
+            description.style.color = 'var(--muted)';
+            description.style.fontSize = '0.95rem';
+            description.style.whiteSpace = 'pre-wrap';
+
+            const meta = document.createElement('div');
+            meta.className = 'task-meta';
+
+            const dueDate = document.createElement('span');
+            dueDate.textContent = `Prazo: ${formatDate(task.dueDate)}`;
+
+            const priority = document.createElement('span');
+            priority.className = 'priority';
+            priority.dataset.priority = task.priority;
+            priority.textContent = `Prioridade: ${task.priority}`;
+
+            const createdAt = document.createElement('span');
+            createdAt.textContent = `Criada em: ${formatDate(task.createdAt?.slice(0, 10))}`;
+
+            meta.appendChild(dueDate);
+            meta.appendChild(priority);
+            meta.appendChild(createdAt);
+
+            content.appendChild(title);
+            if (task.description.trim()) {
+                content.appendChild(description);
+            }
+            content.appendChild(meta);
+
+            const actions = document.createElement('div');
+            actions.className = 'task-actions';
+
+            const editButton = document.createElement('button');
+            editButton.type = 'button';
+            editButton.textContent = 'Editar';
+            editButton.addEventListener('click', () => startEditing(task.id));
+
+            const deleteButton = document.createElement('button');
+            deleteButton.type = 'button';
+            deleteButton.textContent = 'Excluir';
+            deleteButton.addEventListener('click', () => deleteTask(task.id));
+
+            actions.appendChild(editButton);
+            actions.appendChild(deleteButton);
+
+            li.appendChild(checkboxWrapper);
+            li.appendChild(content);
+            li.appendChild(actions);
+
+            return li;
+        }
+
+        function renderTasks() {
+            taskList.innerHTML = '';
+            let filteredTasks = tasks;
+
+            if (currentFilter === 'ativas') {
+                filteredTasks = tasks.filter(task => !task.completed);
+            } else if (currentFilter === 'concluidas') {
+                filteredTasks = tasks.filter(task => task.completed);
+            }
+
+            if (filteredTasks.length === 0) {
+                toggleEmptyState(true);
+            } else {
+                toggleEmptyState(false);
+                const fragment = document.createDocumentFragment();
+                filteredTasks
+                    .sort((a, b) => Number(a.completed) - Number(b.completed))
+                    .forEach(task => fragment.appendChild(createTaskElement(task)));
+                taskList.appendChild(fragment);
+            }
+
+            updateSummary();
+        }
+
+        function resetForm() {
+            taskForm.reset();
+            prioritySelect.value = 'media';
+            editingTaskId = null;
+            submitButton.textContent = 'Adicionar tarefa';
+            cancelEditButton.classList.add('hidden');
+        }
+
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const title = titleInput.value.trim();
+            const description = descriptionInput.value.trim();
+            const dueDate = dueDateInput.value;
+            const priority = prioritySelect.value;
+
+            if (!title) {
+                titleInput.focus();
+                return;
+            }
+
+            if (editingTaskId) {
+                tasks = tasks.map(task =>
+                    task.id === editingTaskId
+                        ? { ...task, title, description, dueDate, priority }
+                        : task
+                );
+            } else {
+                const newTask = {
+                    id: crypto.randomUUID(),
+                    title,
+                    description,
+                    dueDate,
+                    priority,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                };
+                tasks.push(newTask);
+            }
+
+            saveTasks();
+            renderTasks();
+            resetForm();
+        }
+
+        function toggleTaskCompletion(taskId) {
+            tasks = tasks.map(task =>
+                task.id === taskId ? { ...task, completed: !task.completed } : task
+            );
+            saveTasks();
+            renderTasks();
+        }
+
+        function deleteTask(taskId) {
+            if (!confirm('Tem certeza de que deseja excluir esta tarefa?')) {
+                return;
+            }
+            tasks = tasks.filter(task => task.id !== taskId);
+            saveTasks();
+            renderTasks();
+            if (editingTaskId === taskId) {
+                resetForm();
+            }
+        }
+
+        function startEditing(taskId) {
+            const task = tasks.find(item => item.id === taskId);
+            if (!task) return;
+            editingTaskId = taskId;
+            titleInput.value = task.title;
+            descriptionInput.value = task.description;
+            dueDateInput.value = task.dueDate || '';
+            prioritySelect.value = task.priority;
+            submitButton.textContent = 'Salvar alterações';
+            cancelEditButton.classList.remove('hidden');
+            titleInput.focus();
+        }
+
+        function cancelEditing() {
+            resetForm();
+        }
+
+        function clearCompletedTasks() {
+            if (!tasks.some(task => task.completed)) {
+                alert('Não há tarefas concluídas para limpar.');
+                return;
+            }
+
+            if (!confirm('Deseja remover todas as tarefas concluídas?')) {
+                return;
+            }
+
+            tasks = tasks.filter(task => !task.completed);
+            saveTasks();
+            renderTasks();
+        }
+
+        taskForm.addEventListener('submit', handleFormSubmit);
+        cancelEditButton.addEventListener('click', cancelEditing);
+        clearCompletedButton.addEventListener('click', clearCompletedTasks);
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                currentFilter = button.dataset.filter;
+                filterButtons.forEach(btn => btn.classList.toggle('active', btn === button));
+                renderTasks();
+            });
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadTasks();
+            renderTasks();
+        });
+    </script>
+</body>
+</html>
